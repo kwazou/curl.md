@@ -1,6 +1,6 @@
 # curl.md (local)
 
-URL to markdown HTTP server for local use. Fork of [wevm/curl.md](https://github.com/wevm/curl.md) reduced to the transcription engine (`src/md`) and a standalone Node server (`src/local`). No database, Docker, or cloud account required.
+URL to markdown HTTP server for local use. Fork of [wevm/curl.md](https://github.com/wevm/curl.md) reduced to the transcription engine (`src/md`) and a standalone Node server (`src/local`). No database or cloud account required. Runs with Node or Docker.
 
 ## Quick Start
 
@@ -9,6 +9,24 @@ pnpm install --ignore-scripts
 pnpm exec playwright install chromium # once, for JS-only pages (SPAs)
 pnpm serve # http://127.0.0.1:3000 (set HOST/PORT to change)
 ```
+
+### Docker
+
+The image bundles Node, production dependencies, and headless Chromium.
+
+```sh
+docker compose up -d --build # http://127.0.0.1:3000 (set PORT in .env to change host port)
+```
+
+`.env` is loaded if present. `AI_BASE_URL` defaults to `http://host.docker.internal:11434/v1` (Ollama running on the host). To run Ollama in a container instead:
+
+```sh
+docker compose --profile ollama up -d
+docker compose exec ollama ollama pull llama3.1:8b
+# then set AI_BASE_URL=http://ollama:11434/v1 in .env and `docker compose up -d`
+```
+
+Without Compose: `docker build -t curl.md . && docker run --init -p 127.0.0.1:3000:3000 curl.md`.
 
 ## Usage
 

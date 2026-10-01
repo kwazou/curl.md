@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      AI_BASE_URL: ${AI_BASE_URL:-http://host.docker.internal:11434/v1}
+      HOST: 0.0.0.0
+      PORT: 3000
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    init: true
+    ports:
+      - 127.0.0.1:${PORT:-3000}:3000
+    restart: unless-stopped
+
+  # Optional local LLM for `objective`: `docker compose --profile ollama up -d`
+  # then `docker compose exec ollama ollama pull llama3.1:8b`
+  # and set AI_BASE_URL=http://ollama:11434/v1 in .env
+  ollama:
+    image: ollama/ollama
+    profiles: [ollama]
+    volumes:
+      - ollama:/root/.ollama
+
+volumes:
+  ollama:
