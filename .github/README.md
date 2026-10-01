@@ -5,9 +5,10 @@ URL to markdown HTTP server for local use. Fork of [wevm/curl.md](https://github
 ## Quick Start
 
 ```sh
-pnpm install --ignore-scripts
-pnpm exec playwright install chromium # once, for JS-only pages (SPAs)
-pnpm serve # http://127.0.0.1:3000 (set HOST/PORT to change)
+# pnpm v11.0.9 requires npx to run with Node 24+
+npx pnpm@latest install --ignore-scripts
+npx pnpm@latest exec playwright install chromium # once, for JS-only pages (SPAs)
+npx pnpm@latest serve # http://127.0.0.1:3000 (set HOST/PORT to change)
 ```
 
 ### Docker
@@ -42,6 +43,8 @@ curl "127.0.0.1:3000/example.com?fresh"                             # bypass 15m
 curl -H "accept: application/json" 127.0.0.1:3000/example.com       # { "content": "..." }
 ```
 
+To start the server: `npx pnpm@latest serve`
+
 | Query param           | Description                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------- |
 | `objective` / `o`/`q` | Keep only the parts of the page relevant to this objective (verbatim excerpts, via LLM) |
@@ -70,6 +73,8 @@ Env vars or a `.env` file (see `.env.example`). All optional.
 - Target websites (and site-specific sources some rules use, e.g. GitHub API, raw.githubusercontent.com)
 - An OpenAI-compatible LLM endpoint, only when using `objective` (local Ollama works)
 
+To start the server: `npx pnpm@latest serve`
+
 JS-only pages (SPAs) and pages answering 403 are re-rendered in a local headless Chromium (Playwright), launched on first use and reused. Requests from the rendered page to `localhost`, IP addresses, and non-http(s) URLs are blocked. If Chromium isn't installed, the server falls back to the plain HTML result.
 
 The server fetches arbitrary public URLs on behalf of callers (domains resolving to private IPs are not blocked). It binds to `127.0.0.1` by default; don't expose it publicly.
@@ -77,10 +82,11 @@ The server fetches arbitrary public URLs on behalf of callers (domains resolving
 ## Development
 
 ```sh
-pnpm check                         # lint + format
-pnpm check:types                   # type check
-pnpm test --project app --project md --run
-pnpm test --project md:smoke --run # live network checks for site rules
+# pnpm v11.0.9 requires npx to run with Node 24+
+npx pnpm@latest check                         # lint + format
+npx pnpm@latest check:types                   # type check
+npx pnpm@latest test --project app --project md --run
+npx pnpm@latest test --project md:smoke --run # live network checks for site rules
 ```
 
 ## License
