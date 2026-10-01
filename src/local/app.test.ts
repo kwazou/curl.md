@@ -97,6 +97,18 @@ test('uses rush model when mode=rush', async () => {
   expect(JSON.parse(call?.[1]?.body as string).model).toBe('rush')
 })
 
+test('falls back to filtered content when llm finds nothing relevant', async () => {
+  const app = createApp({
+    env: { AI_BASE_URL: 'http://llm.test/v1' },
+    fetch: createFetch({ llmContent: 'NONE' }),
+  })
+
+  const res = await app.request('/example.com?objective=unrelated&keywords=install')
+  const text = await res.text()
+  expect(text).toContain('## Install')
+  expect(text).not.toContain('unrelated')
+})
+
 test('returns ai_failed when llm errors', async () => {
   const app = createApp({
     env: { AI_BASE_URL: 'http://llm.test/v1' },
@@ -129,11 +141,15 @@ test('rejects non-domain urls', async () => {
   expect(fetch).not.toHaveBeenCalled()
 })
 
-function createFetch(options: { llmStatus?: number; upstreamStatus?: number } = {}) {
+function createFetch(
+  options: { llmContent?: string; llmStatus?: number; upstreamStatus?: number } = {},
+) {
   return vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
     if (isLlm(input)) {
       if (options.llmStatus) return new Response(null, { status: options.llmStatus })
-      return Response.json({ choices: [{ message: { content: '## Install\n\nnpm i foo' } }] })
+      return Response.json({
+        choices: [{ message: { content: options.llmContent ?? '## Install\n\nnpm i foo' } }],
+      })
     }
     if (options.upstreamStatus) return new Response(null, { status: options.upstreamStatus })
     return new Response(html, { headers: { 'content-type': 'text/html' } })

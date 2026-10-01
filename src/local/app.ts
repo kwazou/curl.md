@@ -151,12 +151,7 @@ export function createApp(options: createApp.Options = {}) {
         const yaml = yamlStringify(response.meta, { lineWidth: 0 }).trimEnd()
         return yaml ? `---\n${yaml}\n---` : undefined
       })()
-      const body = (() => {
-        if (query.objective) return excerpt
-        if (query.keywords?.length) return filteredContent
-        return response.content
-      })()
-      const content = (frontmatter ? `${frontmatter}\n\n${body}` : body).trimEnd()
+      const content = (frontmatter ? `${frontmatter}\n\n${excerpt}` : excerpt).trimEnd()
 
       const finalTokens = estimateTokenCount(content)
       const sourceTokens = response.extras.source_tokens ?? finalTokens
