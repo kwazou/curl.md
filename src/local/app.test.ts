@@ -76,7 +76,7 @@ test('extracts objective with openai-compatible llm', async () => {
   expect(text).toContain('## Install\n\nnpm i foo')
   expect(text).not.toContain('unrelated')
 
-  const call = fetch.mock.calls.find(([input]) => input.toString().startsWith('http://llm.test'))
+  const call = fetch.mock.calls.find(([input]) => isLlm(input))
   expect(call?.[0]).toBe('http://llm.test/v1/chat/completions')
   const init = call?.[1] as RequestInit & { headers: Record<string, string> }
   expect(init.headers.authorization).toBe('Bearer key')
@@ -93,7 +93,7 @@ test('uses rush model when mode=rush', async () => {
   })
 
   await app.request('/example.com?o=install&m=rush')
-  const call = fetch.mock.calls.find(([input]) => input.toString().startsWith('http://llm.test'))
+  const call = fetch.mock.calls.find(([input]) => isLlm(input))
   expect(JSON.parse(call?.[1]?.body as string).model).toBe('rush')
 })
 
@@ -131,12 +131,15 @@ test('rejects non-domain urls', async () => {
 
 function createFetch(options: { llmStatus?: number; upstreamStatus?: number } = {}) {
   return vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
-    const url = input instanceof Request ? input.url : input.toString()
-    if (url.startsWith('http://llm.test')) {
+    if (isLlm(input)) {
       if (options.llmStatus) return new Response(null, { status: options.llmStatus })
       return Response.json({ choices: [{ message: { content: '## Install\n\nnpm i foo' } }] })
     }
     if (options.upstreamStatus) return new Response(null, { status: options.upstreamStatus })
     return new Response(html, { headers: { 'content-type': 'text/html' } })
   })
+}
+
+function isLlm(input: RequestInfo | URL) {
+  return new URL(input instanceof Request ? input.url : input).hostname === 'llm.test'
 }

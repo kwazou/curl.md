@@ -73,12 +73,18 @@ curl "127.0.0.1:3000/example.com?objective=how+to+install&mode=rush" # LLM extra
 curl "127.0.0.1:3000/example.com?fresh"                             # bypass 15m in-memory cache (f)
 curl -H "accept: application/json" 127.0.0.1:3000/example.com       # { "content": "..." }
 
-# CLI / SDK against the local server
+# CLI against the local server
 CURLMD_BASE_URL=http://127.0.0.1:3000 curl.md example.com --objective "how to install"
-createClient("http://127.0.0.1:3000")
 ```
 
-Configuration (env or `.env`):
+```ts
+// SDK against the local server
+import { createClient } from 'curl.md'
+const client = createClient('http://127.0.0.1:3000')
+const res = await client.fetch('example.com', { objective: 'how to install' })
+```
+
+Configuration (env vars, or a `.env` file — keep `HOST`/`PORT` out of `.env` if you also run the Cloudflare app, since wrangler reads it too):
 
 | Variable                                                 | Required        | Description                                                                                        |
 | -------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------- |

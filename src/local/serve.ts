@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server'
-import { createApp } from './app.ts'
+import { createApp } from '#local/app.ts'
 
 const app = createApp({ env: process.env })
 const hostname = process.env.HOST || '127.0.0.1'

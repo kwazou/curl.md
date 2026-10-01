@@ -164,7 +164,7 @@ export function createApp(options: createApp.Options = {}) {
         vary: 'Accept',
         'x-cache': cached ? 'HIT' : 'MISS',
         'x-tokens-count': String(finalTokens),
-        'x-tokens-saved': String(sourceTokens - finalTokens),
+        'x-tokens-saved': String(Math.max(0, sourceTokens - finalTokens)),
       }
 
       if (accept === 'application/json')
