@@ -18,6 +18,7 @@ import * as ApiKey from '#lib/apiKey.ts'
 import * as Constants from '#lib/constants.ts'
 import * as Cookie from '#lib/cookie.ts'
 import * as Crypto from '#lib/crypto.ts'
+import * as Fetch from '#lib/fetch.ts'
 import * as GitHub from '#lib/github.ts'
 import * as hono from '#lib/hono.ts'
 import * as Nanoid from '#lib/nanoid.ts'
@@ -1920,72 +1921,8 @@ export const api = new Hono<{
   })
   .get(
     '/api/:url{.+}',
-    hono.validator(
-      'param',
-      z.object({
-        url: z
-          .string()
-          .transform((arg) => (arg.includes('://') ? arg : `https://${arg}`))
-          .pipe(
-            z.url({
-              hostname: z.regexes.domain,
-              normalize: true,
-              protocol: /^https?$/,
-            }),
-          )
-          .refine(
-            (url) =>
-              // Extra protection from common bot probe requests (keep in sync with scripts/deployWaf.ts)
-              !/\.(action|aspx?|cgi|css|eot|gif|ico|jpe?g|json|jsx?|map|php|png|svg|tsx?|ttf|webp|woff2?|xml|ya?ml)$/i.test(
-                new URL(url).hostname,
-              ),
-          ),
-      }),
-    ),
-    hono.validator(
-      'query',
-      (() => {
-        const fresh = z
-          .union([z.literal('').transform(() => true), z.coerce.boolean()])
-          .optional()
-          .default(false)
-        const keywords = z
-          .string()
-          .transform((v) => v.split(/[\s,]+/).filter(Boolean))
-          .optional()
-        const mode = DbSchema.request.shape.mode.unwrap().default('smart')
-        const objective = z.string().optional()
-        return z
-          .object({
-            anchor: z.string().optional(),
-            f: fresh,
-            fresh,
-            k: keywords,
-            keywords,
-            m: mode,
-            mode,
-            o: objective,
-            objective,
-            q: objective,
-          })
-          .transform((v) => ({
-            anchor: (() => {
-              if (!v.anchor) return undefined
-              try {
-                const decoded = decodeURIComponent(v.anchor).trim().replace(/^#+/, '')
-                return decoded || undefined
-              } catch {
-                const trimmed = v.anchor.trim().replace(/^#+/, '')
-                return trimmed || undefined
-              }
-            })(),
-            fresh: v.fresh || v.f,
-            keywords: v.keywords ?? v.k,
-            mode: v.mode === 'smart' && v.m !== 'smart' ? v.m : v.mode,
-            objective: v.objective ?? v.q ?? v.o,
-          }))
-      })(),
-    ),
+    hono.validator('param', Fetch.param),
+    hono.validator('query', Fetch.query),
     async (c) => {
       if (hono.narrowValidation) return hono.validationError(c)
       if (hono.narrowValidation) return hono.invalidApiKey(c)
