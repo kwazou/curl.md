@@ -1,5 +1,4 @@
 import { estimateTokenCount } from 'tokenx'
-import type { DB } from '#db/types.gen.ts'
 import { filterFrontmatterKeys, fromHtml } from './fromHtml.ts'
 
 export function create(options: create.Options = {}): create.ReturnType {
@@ -89,9 +88,7 @@ export function create(options: create.Options = {}): create.ReturnType {
         Boolean(matched?.rule?.extract) ||
         Boolean(matched?.rule?.fetch)
       let sourceTokens: number | undefined
-      let sourceTokensMethod: DB.request['source_tokens_method'] = usesShortcut
-        ? 'estimated'
-        : 'markdown'
+      let sourceTokensMethod: SourceTokensMethod = usesShortcut ? 'estimated' : 'markdown'
       let profile: DetectedProfile | undefined
 
       const result = await (async () => {
@@ -279,13 +276,15 @@ export namespace create {
           meta: Meta
           extras: {
             source_tokens: number | undefined
-            source_tokens_method: DB.request['source_tokens_method']
+            source_tokens_method: SourceTokensMethod
           }
         }
       | { ok: false; status: number; error?: string }
     >
   }
 }
+
+export type SourceTokensMethod = 'estimated' | 'html' | 'markdown'
 
 export type Rule = {
   patterns: URLPattern[]

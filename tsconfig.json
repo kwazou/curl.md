@@ -1,8 +1,30 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./config/tsconfig.app.json" },
-    { "path": "./config/tsconfig.node.json" },
-    { "path": "./config/tsconfig.workers.json" }
-  ]
+  "compilerOptions": {
+    "paths": {
+      "#*": ["./src/*"]
+    },
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "include": ["src", "scripts", "test", "vite.config.ts"]
 }

@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import * as DbSchema from '#db/schemas.gen.ts'
 
 export const param = z.object({
   url: z
@@ -30,7 +29,7 @@ export const query = (() => {
     .string()
     .transform((v) => v.split(/[\s,]+/).filter(Boolean))
     .optional()
-  const mode = DbSchema.request.shape.mode.unwrap().default('smart')
+  const mode = z.enum(['rush', 'smart']).default('smart')
   const objective = z.string().optional()
   return z
     .object({
