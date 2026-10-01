@@ -1,38 +1,25 @@
 allowBuilds:
-  '@anthropic-ai/claude-code': true
   '@google/genai': false
-  '@sentry/cli': true
-  bun: true
   cpu-features: false
   esbuild: false
   koffi: false
   msgpackr-extract: false
-  msw: true
-  opencode-ai: true
   protobufjs: false
   sharp: false
   ssh2: false
-  workerd: true
-auditConfig:
-  ignoreGhsas:
-    # false positive — matches npm "cli" package, not our "curl.md" workspace
-    - GHSA-6cpc-mj5c-m9rq
 blockExoticSubdeps: true
 catalog:
-  hono: ^4.12.25
+  hono: ^4.13.7
   # Vite+ dependency aliases.
   vite: npm:@voidzero-dev/vite-plus-core@0.1.24
   vite-plus: 0.1.24
   vitest: npm:@voidzero-dev/vite-plus-test@0.1.24
 minimumReleaseAge: 1440
-minimumReleaseAgeExclude:
-  - incur
 overrides:
   '@babel/core@<=7.29.0': 7.29.7
   '@grpc/grpc-js@>=1.14.0 <1.14.4': 1.14.4
   '@opentelemetry/core@<2.8.0': 2.8.0
   '@protobufjs/utf8@<=1.1.0': 1.1.1
-  '@tanstack/start-server-core@<1.167.30': 1.167.30
   basic-ftp@<=5.3.0: 5.3.1
   brace-expansion@>=5.0.0 <5.0.6: 5.0.6
   esbuild@>=0.27.3 <0.28.1: 0.28.1
@@ -42,6 +29,8 @@ overrides:
   ip-address@<10.1.1: 10.1.1
   js-yaml@<3.15.0: 3.15.0
   js-yaml@>=4.0.0 <=4.1.1: 4.3.0
+  nanoid@<3.3.18: 3.3.19
+  postcss@<8.5.23: 8.5.28
   protobufjs@<=7.6.2: 7.6.3
   semver@<7.7.4: 7.7.4
   tmp@<0.2.7: 0.2.7
@@ -54,14 +43,6 @@ packageExtensions:
   '@voidzero-dev/vite-plus-core@*':
     dependencies:
       vite-plus: 0.1.24
-packages:
-  - cli
-  - plugins/*
-# TODO: Remove once issue is fixed
-# https://github.com/TanStack/router/pull/7115
-patchedDependencies:
-  '@tanstack/react-router@1.169.2': config/patches/@tanstack__react-router@1.169.2.patch
-  '@tanstack/router-core@1.169.2': config/patches/@tanstack__router-core@1.169.2.patch
 peerDependencyRules:
   allowAny:
     - vite

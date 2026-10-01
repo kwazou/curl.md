@@ -1,0 +1,10 @@
+**/*.test.ts
+**/__fixtures__
+**/__snapshots__
+**/node_modules
+.env*
+!.env.example
+.git
+.github
+.vite
+tsconfig.tsbuildinfo

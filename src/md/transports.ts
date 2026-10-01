@@ -1,53 +1,5 @@
-import { z } from 'zod/mini'
 import type { Transport } from './mod.ts'
 import { defineTransport } from './mod.ts'
-
-export const cfBrowserRendering = defineTransport<{
-  accountId: string
-  apiToken: string
-}>(async (url, init, context) => {
-  if ((!context.render && context.previous?.status !== 403) || !context.options) return null
-  const signal = AbortSignal.timeout(20_000)
-  const res = await context.fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${context.options.accountId}/browser-rendering/content`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${context.options.apiToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: url.toString(),
-        rejectResourceTypes: ['font', 'image', 'media'],
-        gotoOptions: { waitUntil: 'networkidle2' },
-      }),
-      signal: init?.signal ? AbortSignal.any([init?.signal, signal]) : signal,
-    },
-  )
-  if (!res.ok) return null
-  const content = await (async () => {
-    const content = await res.text()
-    const contentType = res.headers.get('content-type')?.toLowerCase() ?? ''
-    if (!contentType.includes('application/json')) return content
-
-    try {
-      return z.parse(
-        z.object({
-          result: z.string(),
-          success: z.literal(true),
-        }),
-        JSON.parse(content),
-      ).result
-    } catch {
-      return null
-    }
-  })()
-  if (content === null) return null
-  if (/error code:\s*\d+/i.test(content)) return null
-  return new Response(content, {
-    headers: { 'content-type': 'text/html' },
-  })
-})
 
 export const fetch = defineTransport<
   | {
