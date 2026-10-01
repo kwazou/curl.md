@@ -1,6 +1,8 @@
 import { expect, test, vi } from 'vitest'
 import { createApp } from '#local/app.ts'
 
+const spaShell =
+  '<html><head><title>App</title><script type="module" src="/app.js"></script></head><body><div id="root"></div></body></html>'
 const html =
   '<html><head><title>Hello</title></head><body><main><h1>Hello</h1><p>World paragraph with enough text to be considered content.</p><h2>Install</h2><p>npm i foo</p><h2>Other</h2><p>unrelated</p></main></body></html>'
 
@@ -131,6 +133,46 @@ test('returns fetch_failed when upstream errors', async () => {
   expect(await res.json()).toEqual({ code: 'fetch_failed', message: 'Upstream returned 404' })
 })
 
+test('renders spa shells with local browser', async () => {
+  const render = vi.fn(async () => html)
+  const app = createApp({ fetch: createFetch({ upstreamHtml: spaShell }), render })
+
+  const res = await app.request('/example.com')
+  expect(res.status).toBe(200)
+  expect(await res.text()).toContain('# Hello')
+  expect(render).toHaveBeenCalledWith(new URL('https://example.com/'))
+})
+
+test('renders with local browser when upstream returns 403', async () => {
+  const render = vi.fn(async () => html)
+  const app = createApp({ fetch: createFetch({ upstreamStatus: 403 }), render })
+
+  const res = await app.request('/example.com')
+  expect(res.status).toBe(200)
+  expect(await res.text()).toContain('# Hello')
+})
+
+test('does not render static pages with local browser', async () => {
+  const render = vi.fn(async () => html)
+  const app = createApp({ fetch: createFetch(), render })
+
+  await app.request('/example.com')
+  expect(render).not.toHaveBeenCalled()
+})
+
+test('disables local browser with BROWSER_RENDERING=false', async () => {
+  const render = vi.fn(async () => html)
+  const app = createApp({
+    env: { BROWSER_RENDERING: 'false' },
+    fetch: createFetch({ upstreamStatus: 403 }),
+    render,
+  })
+
+  const res = await app.request('/example.com')
+  expect(res.status).toBe(502)
+  expect(render).not.toHaveBeenCalled()
+})
+
 test('rejects non-domain urls', async () => {
   const fetch = createFetch()
   const app = createApp({ fetch })
@@ -142,7 +184,12 @@ test('rejects non-domain urls', async () => {
 })
 
 function createFetch(
-  options: { llmContent?: string; llmStatus?: number; upstreamStatus?: number } = {},
+  options: {
+    llmContent?: string
+    llmStatus?: number
+    upstreamHtml?: string
+    upstreamStatus?: number
+  } = {},
 ) {
   return vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
     if (isLlm(input)) {
@@ -152,7 +199,7 @@ function createFetch(
       })
     }
     if (options.upstreamStatus) return new Response(null, { status: options.upstreamStatus })
-    return new Response(html, { headers: { 'content-type': 'text/html' } })
+    return new Response(options.upstreamHtml ?? html, { headers: { 'content-type': 'text/html' } })
   })
 }
 

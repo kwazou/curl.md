@@ -113,6 +113,9 @@ importers:
       nanoid:
         specifier: ^5.1.9
         version: 5.1.9
+      playwright:
+        specifier: ^1.59.1
+        version: 1.59.1
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
@@ -231,9 +234,6 @@ importers:
       node:
         specifier: runtime:^24.5.1
         version: runtime:24.15.0
-      playwright:
-        specifier: ^1.59.1
-        version: 1.59.1
       rehype-slug:
         specifier: ^6.0.0
         version: 6.0.0

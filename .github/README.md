@@ -61,6 +61,7 @@ Standalone URL → markdown server for local use. Runs on Node only — no Docke
 
 ```sh
 pnpm install --ignore-scripts # skips Cloudflare/plugin codegen, not needed for the local server
+pnpm exec playwright install chromium # once, for JS-only pages (SPAs)
 pnpm serve # http://127.0.0.1:3000 (set HOST/PORT to change)
 
 # Transcribe a URL to markdown
@@ -86,23 +87,24 @@ const res = await client.fetch('example.com', { objective: 'how to install' })
 
 Configuration (env vars, or a `.env` file — keep `HOST`/`PORT` out of `.env` if you also run the Cloudflare app, since wrangler reads it too):
 
-| Variable                                                 | Required        | Description                                                                                        |
-| -------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------- |
-| `HOST` / `PORT`                                          | No              | Listen address (default `127.0.0.1:3000`)                                                          |
-| `AI_BASE_URL`                                            | For `objective` | OpenAI-compatible API base URL (default `http://localhost:11434/v1`, [Ollama](https://ollama.com)) |
-| `AI_MODEL`                                               | For `objective` | Model for `mode=smart` (default `llama3.1:8b`)                                                     |
-| `AI_MODEL_RUSH`                                          | No              | Model for `mode=rush` (default `AI_MODEL`)                                                         |
-| `AI_API_KEY`                                             | No              | API key for the AI API (sent as `Authorization` header)                                            |
-| `GH_TOKEN`                                               | No              | GitHub token for higher GitHub API rate limits / private repos                                     |
-| `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_BROWSER_API_TOKEN` | No              | Enables Cloudflare Browser Rendering fallback for JS-only pages and 403s                           |
+| Variable            | Required        | Description                                                                                              |
+| ------------------- | --------------- | -------------------------------------------------------------------------------------------------------- |
+| `HOST` / `PORT`     | No              | Listen address (default `127.0.0.1:3000`)                                                                |
+| `AI_BASE_URL`       | For `objective` | OpenAI-compatible API base URL (default `http://localhost:11434/v1`, [Ollama](https://ollama.com))       |
+| `AI_MODEL`          | For `objective` | Model for `mode=smart` (default `llama3.1:8b`)                                                           |
+| `AI_MODEL_RUSH`     | No              | Model for `mode=rush` (default `AI_MODEL`)                                                               |
+| `AI_API_KEY`        | No              | API key for the AI API (sent as `Authorization` header)                                                  |
+| `GH_TOKEN`          | No              | GitHub token for higher GitHub API rate limits / private repos                                           |
+| `BROWSER_RENDERING` | No              | Set to `false` to disable the local Chromium fallback for JS-only pages (SPAs) and 403s (default `true`) |
 
 Remaining external dependencies:
 
 - Target websites (and site-specific sources some rules use, e.g. GitHub API, raw.githubusercontent.com)
 - An OpenAI-compatible LLM endpoint, only when using `objective` (local Ollama works)
-- Cloudflare Browser Rendering, optional, only for client-rendered (SPA) pages
 
-The server fetches arbitrary public URLs on behalf of callers. It binds to `127.0.0.1` by default; don't expose it publicly.
+JS-only pages (SPAs) and pages answering 403 are re-rendered in a local headless Chromium (Playwright), launched on first use and reused. Requests from the rendered page to `localhost`, IP addresses, and non-http(s) URLs are blocked. If Chromium isn't installed, the server falls back to the plain HTML result.
+
+The server fetches arbitrary public URLs on behalf of callers (domains resolving to private IPs are not blocked). It binds to `127.0.0.1` by default; don't expose it publicly.
 
 ## Documentation
 

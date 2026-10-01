@@ -6,11 +6,12 @@ import { z } from 'zod'
 import * as Constants from '#lib/constants.ts'
 import * as Fetch from '#lib/fetch.ts'
 import * as hono from '#lib/hono.ts'
+import * as Browser from '#local/browser.ts'
 import * as Md from '#md/index.ts'
 
 /**
  * Standalone URL → markdown HTTP app for local use (Node).
- * No Postgres, KV, Queues, Stripe, GitHub OAuth, or Sentry required.
+ * No Postgres, KV, Queues, Stripe, GitHub OAuth, Sentry, or Cloudflare required.
  */
 export function createApp(options: createApp.Options = {}) {
   const env = Env.parse(
@@ -33,14 +34,9 @@ export function createApp(options: createApp.Options = {}) {
     },
     transport: Md.transports.fallback([
       Md.transports.fetch(),
-      ...(env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_BROWSER_API_TOKEN
-        ? [
-            Md.transports.cfBrowserRendering({
-              accountId: env.CLOUDFLARE_ACCOUNT_ID,
-              apiToken: env.CLOUDFLARE_BROWSER_API_TOKEN,
-            }),
-          ]
-        : []),
+      ...(env.BROWSER_RENDERING === 'false'
+        ? []
+        : [Browser.transport(options.render ? { render: options.render } : undefined)]),
     ]),
   })
 
@@ -239,6 +235,7 @@ export declare namespace createApp {
   type Options = {
     env?: Record<string, string | undefined> | undefined
     fetch?: typeof globalThis.fetch | undefined
+    render?: typeof Browser.render | undefined
   }
 }
 
@@ -247,7 +244,6 @@ const Env = z.object({
   AI_BASE_URL: z.string().default('http://localhost:11434/v1'),
   AI_MODEL: z.string().default('llama3.1:8b'),
   AI_MODEL_RUSH: z.string().optional(),
-  CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
-  CLOUDFLARE_BROWSER_API_TOKEN: z.string().optional(),
+  BROWSER_RENDERING: z.enum(['false', 'true']).default('true'),
   GH_TOKEN: z.string().optional(),
 })
