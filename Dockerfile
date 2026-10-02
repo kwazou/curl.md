@@ -15,10 +15,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm config set fetch-retries 5 \
   && pnpm config set fetch-retry-mintimeout 20000 \
   && pnpm config set fetch-retry-maxtimeout 120000 \
-  && pnpm config set network-timeout 300000 \
-  && (pnpm install --frozen-lockfile --prod \
-      || pnpm install --frozen-lockfile --prod \
-      || pnpm install --frozen-lockfile --prod) \
+  && pnpm install --frozen-lockfile --prod \
   && pnpm exec playwright install --with-deps --only-shell chromium \
   && rm -rf /root/.cache /root/.local/share/pnpm /var/lib/apt/lists/*
 
