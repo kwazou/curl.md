@@ -8,10 +8,7 @@ on:
       - 'src/**'
       - 'Dockerfile'
       - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'tsconfig.json'
-      - '.github/workflows/docker-publish.yml'
+      - 'npm-lock.json'
   release:
     types: [published]
   workflow_dispatch:

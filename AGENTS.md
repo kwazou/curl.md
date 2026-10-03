@@ -6,15 +6,14 @@ Agent guidance for this repository.
 
 ## Commands
 
-Prefer running these scripts instead of using `npx`. Use `pnpm` over `npx` for running binaries.
+Prefer running these scripts instead of using `npx`. Use `npm` over `npx` for running binaries.
 
-- `pnpm check` - Lint and format with oxlint + oxfmt
-- `pnpm check:types` - Type check with tsgo
-- `pnpm gen:fixtures:md:rules` - Re-fetch live sources for `src/md/rules` fixture tests
-  - Run `pnpm test --project md --run src/md/ --update` after to update snapshots
-- `pnpm test` - Run tests with Vitest (includes all projects)
-- `pnpm test --project name` - Always try to scope tests to specific projects when possible
-- `pnpm serve` - Run local HTTP server (`src/local/serve.ts`)
+- `npm run build` - Type check with tsgo
+- `npm run gen:fixtures:md:rules` - Re-fetch live sources for `src/md/rules` fixture tests
+  - Run `npm run test --project md --run src/md/ --update` after to update snapshots
+- `npm run test` - Run tests with Vitest (includes all projects)
+- `npm run test --project name` - Always try to scope tests to specific projects when possible
+- `npm run serve` - Run local HTTP server (`src/local/serve.ts`)
 
 ## API (Hono RPC)
 
@@ -58,5 +57,5 @@ Prefer running these scripts instead of using `npx`. Use `pnpm` over `npx` for r
 ## Misc
 
 - Repo/project-level README is located at `.github/README.md`
-- Use `pnpm-workspace.yaml>overrides` instead of `package.json#pnpm.overrides`
-- Make sure comments don't get dropped from `pnpm-workspace.yaml` when making edits or fixing `pnpm audit`
+- Use `package.json#overrides` — `pnpm-workspace.yaml` was removed for npm compatibility
+- Make sure comments don't get dropped from `package.json#overrides` when making edits

@@ -43,9 +43,9 @@ curl "127.0.0.1:3000/example.com?fresh"                             # bypass 15m
 curl -H "accept: application/json" 127.0.0.1:3000/example.com       # { "content": "..." }
 ```
 
-To start the server: `npx pnpm@latest serve`
+to start the server: `npm run serve`
 
-| Query param           | Description                                                                             |
+### Options           | Description                                                                             |
 | --------------------- | --------------------------------------------------------------------------------------- |
 | `objective` / `o`/`q` | Keep only the parts of the page relevant to this objective (verbatim excerpts, via LLM) |
 | `keywords` / `k`      | Comma/space separated; keep sections containing any keyword (no LLM)                    |
@@ -56,7 +56,7 @@ Responses are `text/markdown` with YAML frontmatter (title, url, …), or JSON w
 
 ## Configuration
 
-Env vars or a `.env` file (see `.env.example`). All optional.
+All options are optional. Set via env vars or `.env` file (see `.env.example`).
 
 | Variable            | Description                                                                                        |
 | ------------------- | -------------------------------------------------------------------------------------------------- |
@@ -68,25 +68,13 @@ Env vars or a `.env` file (see `.env.example`). All optional.
 | `GH_TOKEN`          | GitHub token for higher GitHub API rate limits / private repos                                     |
 | `BROWSER_RENDERING` | Set to `false` to disable the local Chromium fallback (default `true`)                             |
 
-## External dependencies
-
-- Target websites (and site-specific sources some rules use, e.g. GitHub API, raw.githubusercontent.com)
-- An OpenAI-compatible LLM endpoint, only when using `objective` (local Ollama works)
-
-To start the server: `npx pnpm@latest serve`
-
-JS-only pages (SPAs) and pages answering 403 are re-rendered in a local headless Chromium (Playwright), launched on first use and reused. Requests from the rendered page to `localhost`, IP addresses, and non-http(s) URLs are blocked. If Chromium isn't installed, the server falls back to the plain HTML result.
-
-The server fetches arbitrary public URLs on behalf of callers (domains resolving to private IPs are not blocked). It binds to `127.0.0.1` by default; don't expose it publicly.
-
 ## Development
 
 ```sh
-# pnpm v11.0.9 requires npx to run with Node 24+
-npx pnpm@latest check                         # lint + format
-npx pnpm@latest check:types                   # type check
-npx pnpm@latest test --project app --project md --run
-npx pnpm@latest test --project md:smoke --run # live network checks for site rules
+npm run build                         # type check
+npm run gen:fixtures:md:rules         # re-fetch live sources
+npm run test --project app --project md --run
+npm run test --project md:smoke --run # live network checks for site rules
 ```
 
 ## License

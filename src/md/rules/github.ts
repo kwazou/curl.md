@@ -670,9 +670,8 @@ function hastToMarkdown(node: Element): string {
 
 function classNames(el: Element): string[] {
   const raw = el.properties?.className
-  if (Array.isArray(raw)) return raw.map(String)
-  if (typeof raw === 'string') return raw.split(/\s+/)
-  return []
+  const values = Array.isArray(raw) ? raw.map(String) : raw != null ? String(raw).split(/\s+/).filter(Boolean) : []
+  return values
 }
 
 function extractBranchRefs(

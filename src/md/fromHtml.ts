@@ -214,18 +214,14 @@ function isKnownContentRoot(node: Element, profile?: Profile<Record<string, unkn
 function matchesSelector(node: Element, selector: string): boolean {
   if (selector.startsWith('#')) return node.properties?.id === selector.slice(1)
   if (!selector.startsWith('.')) return false
-  const className = node.properties?.className
-  const classes = Array.isArray(className)
-    ? className.map(String)
-    : typeof className === 'string'
-      ? className.split(/\s+/).filter(Boolean)
-      : []
+  const className = String(node.properties?.className)
+  const classes = className.split(/\s+/).filter(Boolean).map(String)
   return classes.includes(selector.slice(1))
 }
 
 function isSkipLink(node: Element): boolean {
   if (node.tagName !== 'a') return false
-  const href = node.properties?.href
+  const href = String(node.properties?.href)
   if (typeof href !== 'string' || !href.startsWith('#')) return false
   const text = hastToText(node).toLowerCase()
   return text.includes('skip')
@@ -233,22 +229,20 @@ function isSkipLink(node: Element): boolean {
 
 function isDecorativeHashLink(node: Element): boolean {
   if (node.tagName !== 'a') return false
-  const href = node.properties?.href
+  const href = String(node.properties?.href)
   if (typeof href !== 'string' || !href.startsWith('#')) return false
 
-  const className = node.properties?.className
-  const classes = Array.isArray(className)
-    ? className.map((value) => String(value).toLowerCase())
-    : typeof className === 'string'
-      ? className.toLowerCase().split(/\s+/).filter(Boolean)
-      : []
+  const className = String(node.properties?.className)
+  const classes = className.split(/\s+/).filter(Boolean).map((value) => String(value).toLowerCase())
   if (classes.includes('headerlink') || classes.includes('hash-link')) return true
 
-  const labels = [node.properties?.title, node.properties?.ariaLabel]
-    .filter((value): value is string => typeof value === 'string')
-    .map((value) => value.toLowerCase())
+  const labels = [
+    String(node.properties?.title),
+    String(node.properties?.ariaLabel),
+  ].filter(Boolean)
+  const labelsLower = labels.map((value) => value.toLowerCase())
   if (
-    labels.some(
+    labelsLower.some(
       (label) =>
         label.includes('permanent link') ||
         label.includes('direct link') ||
@@ -263,22 +257,23 @@ function isDecorativeHashLink(node: Element): boolean {
 }
 
 function isHidden(node: Element): boolean {
-  if (node.properties?.hidden != null) return true
-  if (node.properties?.ariaHidden === 'true' || node.properties?.ariaHidden === true) return true
-  const style = node.properties?.style
-  if (typeof style === 'string' && /display\s*:\s*none|visibility\s*:\s*hidden/i.test(style))
-    return true
+  const hidden = node.properties?.hidden
+  if (hidden != null) return true
+  const ariaHidden = node.properties?.ariaHidden
+  if (ariaHidden === 'true') return true
+  if (ariaHidden != null && String(ariaHidden) === 'true') return true
+  const style = String(node.properties?.style)
+  if (typeof style !== 'string') return false
+  if (/display\s*:\s*none|visibility\s*:\s*hidden/i.test(style)) return true
   return false
 }
 
 function matchesNoiseClassId(node: Element): boolean {
-  const classes = node.properties?.className as string[] | undefined
-  const id = node.properties?.id as string | undefined
-  for (const value of [...(classes ?? []), ...(id ? [id] : [])]) {
-    const str = String(value)
-    // Skip Tailwind utility classes / CSS custom properties that contain
-    // noise-like substrings (e.g. `md:[--fd-sidebar-width:268px]`)
-    if (/[[\]():]|^--/.test(str)) continue
+  const className = String(node.properties?.className)
+  const id = String(node.properties?.id)
+  for (const value of [...className.split('\s+').filter(Boolean), ...(id ? id.split('\s+').filter(Boolean) : [])]) {
+    const str = value
+    if (/[[\]()\:]|^--/.test(str)) continue
     if (/^(has|is)-/.test(str)) continue
     const parts = str.toLowerCase().split(/[^a-z0-9]+/)
     if (parts.some((p) => noiseClassIdTokens.has(p))) return true
